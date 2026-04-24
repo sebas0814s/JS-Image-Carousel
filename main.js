@@ -1,50 +1,70 @@
-let slideIndex = 0;
-let timeoutID; // Agrega una variable global para almacenar el identificador de tiempo
-showSlides();
-
-function showSlides() {
-  var i;
-  var slides = document.getElementsByClassName("mySlides");
-  var dots = document.getElementsByClassName("dot");
-  for (i = 0; i < slides.length; i++) {
-    if (slides[i] && slides[i].style) { // condición para verificar si el objeto es definido
-      slides[i].style.display = "none";  
+// Image Carousel - Vanilla JavaScript
+(function() {
+    let currentSlide = 0;
+    let isPlaying = true;
+    let intervalId = null;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const totalSlides = slides.length;
+    
+    // Auto-play carrusel
+    function startCarousel() {
+        intervalId = setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            showSlide(currentSlide);
+        }, 3000);
+        toggleBtn.innerHTML = '⏸️ Detener';
+        isPlaying = true;
     }
-  }
-  slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}    
-  for (i = 0; i < dots.length; i++) {
-    if (dots[i].className == "dot active") {
-      dots[i].className = "dot";
+    
+    function stopCarousel() {
+        clearInterval(intervalId);
+        toggleBtn.innerHTML = '▶️ Reanudar';
+        isPlaying = false;
     }
-  }
-  if (slides[slideIndex-1] && slides[slideIndex-1].style) { // condición para verificar si el objeto es definido
-    slides[slideIndex-1].style.display = "block";  
-  }
-  if (dots[slideIndex-1]) {
-    dots[slideIndex-1].className += " active";
-  }
-  timeoutID = setTimeout(showSlides, 1000); // Almacena el identificador de tiempo en una variable global
-}
-
-window.addEventListener("load", function() {
-  // Agrega el evento al botón detener
-  var stopButton = document.getElementById("stopButton");
-  stopButton.addEventListener("click", function() {
-    if (timeoutID) { // Comprueba si la presentación de diapositivas se está ejecutando actualmente
-      clearTimeout(timeoutID); // Detiene la presentación de diapositivas
-      stopButton.innerHTML = "Reanudar presentación"; // Cambia el texto del botón
-      timeoutID = null; // Marca la presentación de diapositivas como detenida
-    } else {
-      showSlides(); // Reanuda la presentación de diapositivas
-      stopButton.innerHTML = "Detener presentación"; // Cambia el texto del botón
+    
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
     }
-  });
-});
-
-
-
-
-
-
-
+    
+    // Change slide by +/- 1
+    window.changeSlide = function(n) {
+        stopCarousel();
+        currentSlide = (currentSlide + n + totalSlides) % totalSlides;
+        showSlide(currentSlide);
+        startCarousel();
+    };
+    
+    // Go to specific slide
+    window.goToSlide = function(n) {
+        stopCarousel();
+        showSlide(n);
+        startCarousel();
+    };
+    
+    // Toggle play/pause
+    toggleBtn.addEventListener('click', () => {
+        if (isPlaying) {
+            stopCarousel();
+        } else {
+            startCarousel();
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+        if (e.key === 'ArrowRight') changeSlide(1);
+    });
+    
+    // Start
+    startCarousel();
+    console.log('🎠 Carousel cargado! Usa ← → para navegar');
+})();
